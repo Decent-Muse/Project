@@ -1,41 +1,13 @@
 import pandas as pd
-import numpy as np
-import sys
+import datetime
 
-file_location = sys.argv[1]
+file_location = 'new.csv'
 
-# reading the csv file '|' separated
-df = pd.read_csv(file_location, sep='|', names=['POS_Application_Name','STOREID','MACID','BILLNO','BARCODE','GUID','CREATED_STAMP','CAPTURED_WINDOW','UPDATE_STAMP'])
-#df = pd.read_csv(file_location, sep='|')
-
-# correcting the barcode size
+df = pd.read_csv(file_location, sep='|', names=['BARCODE','CREATED_STAMP'])
 barcode_size_corrected_df = df[(df['BARCODE'].str.len() == 12) | (df['BARCODE'].str.len() == 13) | (df['BARCODE'].str.len() == 8)]
-
-# removing columns that are not required
-no_capture_window = barcode_size_corrected_df[['POS_Application_Name','STOREID','MACID','BILLNO','BARCODE','GUID','CREATED_STAMP']]
-
-# extracting barcodes using regular expressions
+no_capture_window = barcode_size_corrected_df[['BARCODE','CREATED_STAMP']]
 barcode_pattern = '^[0-9]*$'
 barcode_rectified = no_capture_window[no_capture_window['BARCODE'].str.contains(barcode_pattern)]
-
-# converting barcodes to float
-barcode_rectified.BARCODE = barcode_rectified.BARCODE.astype(str).astype(float)
-
-#numpy array of barcodes
-barcodes = pd.DataFrame.as_matrix(barcode_rectified['BARCODE'])
-
-# converting created_stamp to datetime object
-barcode_rectified['CREATED_STAMP'] = pd.to_datetime(barcode_rectified['CREATED_STAMP'], format='%Y-%m-%d %H:%M:%S')
-
-# changing the date time format
-barcode_rectified['CREATED_STAMP'] = barcode_rectified['CREATED_STAMP'].dt.strftime('%Y%m%d')
-
-# converting date to float
-barcode_rectified.CREATED_STAMP = barcode_rectified.CREATED_STAMP.astype(str).astype(float)
-
-# numpy array of created dates
-created_stamps = pd.DataFrame.as_matrix(barcode_rectified['CREATED_STAMP'])
-
 print(len(barcode_rectified.index))
 print(barcode_rectified[:10])
-#barcode_rectified.to_csv('SOFT_GENv2.csv', sep='|', index=False)
+barcode_rectified.to_csv('new2.csv', sep='|', index=False)
